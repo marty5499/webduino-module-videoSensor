@@ -79,6 +79,7 @@ class Hotspot {
     this.detectCB = this.in = this.out = function (pos, canvas) {};
     this.startDetect = false;
     this.firstDetect = true;
+    this.removed = false;
     this.pause = false;
     this._inside = false;
     this.lastPos = false;
@@ -150,6 +151,7 @@ class Hotspot {
   stop() {
     this.startDetect = false;
     this.canvas.remove();
+    this.removed = true;
   }
 
   setFlip(flip) {
@@ -242,7 +244,11 @@ class Hotspot {
     if (this.cv == null) {
       return;
     }
-
+    if (this.removed) {
+      this.startDetect = false;
+      this.bs.delete();
+      return;
+    }
     this.insideObjList = [];
     this._inside = false;
     let src = cv.matFromImageData(this.getImageData());

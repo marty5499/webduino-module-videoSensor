@@ -51,6 +51,17 @@ class Actor {
     });
   }
 
+  delete(url, switchTime) {
+    var self = this;
+    var lastPos = [self.x, self.y, self.width, self.height];
+    self.setImg(url, lastPos, function () {
+      self.tracking.stop();
+      setTimeout(function () {
+        self.hide();
+      }, self.jsonInfo.touchTime);
+    });
+  }
+
   play() {
     this.audio.play();
     return this;

@@ -56,6 +56,16 @@ Blockly.JavaScript['waspot_reloadimg_actor'] = function (block) {
   return code;
 };
 
+
+Blockly.JavaScript['waspot_delete_actor'] = function (block) {
+  var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
+  var value_imgurl = Blockly.JavaScript.valueToCode(block, 'imgURL', Blockly.JavaScript.ORDER_ATOMIC);
+  var value_after = Blockly.JavaScript.valueToCode(block, 'after', Blockly.JavaScript.ORDER_ATOMIC);
+  var code = variable_actor + '.delete.call(this,' + value_imgurl + ',' + value_after + ');\n';
+  return code;
+};
+
+
 Blockly.JavaScript['waspot_loadimg_actor'] = function (block) {
   var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
   var value_imgurl = Blockly.JavaScript.valueToCode(block, 'imgURL', Blockly.JavaScript.ORDER_ATOMIC);

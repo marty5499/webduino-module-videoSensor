@@ -60,6 +60,18 @@
       </shadow>
     </value>
   </block>
+  <block type='waspot_delete_actor'>
+    <value name="imgURL">
+      <shadow type="text">
+        <field name="TEXT">https://webduino.io/img/training/training4.png</field>
+      </shadow>
+    </value>
+    <value name="after">
+      <shadow type="math_number">
+        <field name="NUM">0.5</field>
+      </shadow>
+    </value>
+  </block>
   <block type='waspot_set_image_size'>
     <value name="width">
       <shadow type="math_number">

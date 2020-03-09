@@ -5,9 +5,8 @@ Webduino Module for waspot
 
 ## Installation
 
-```shell
-bower install https://github.com/webduinoio/webduino-module-videoSensor.git
-```
+Code.customTab.$__add__("https://127.0.0.1:8080/blockly.json").then(console.log);
+
 
 ## License
 

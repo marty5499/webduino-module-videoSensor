@@ -153,6 +153,29 @@ Blockly.Blocks['waspot_reloadimg_actor'] = {
 };
 
 
+Blockly.Blocks['waspot_delete_actor'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("設定")
+      .appendField(new Blockly.FieldVariable("actor"), "actor");
+    this.appendValueInput("imgURL")
+      .setCheck(null)
+      .appendField("圖片URL：");
+    this.appendValueInput("after")
+      .setCheck(null)
+      .appendField(" , ");
+    this.appendDummyInput()
+      .appendField("秒後刪除此物件");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(120);
+    this.setTooltip('');
+    this.setHelpUrl('https://webduino.io/');
+  }
+};
+
+
 Blockly.Blocks['waspot_loadimg_actor'] = {
   init: function () {
     this.appendDummyInput()
