@@ -214,30 +214,27 @@ Blockly.Blocks['waspot_move_actor'] = {
   }
 };
 
-//https://blockly-demo.appspot.com/static/demos/blockfactory_old/index.html#z4scj4
+//https://blockly-demo.appspot.com/static/demos/blockfactory_old/index.html#yucwvz
 Blockly.Blocks['waspot_move_between_actor'] = {
   init: function() {
+    this.appendValueInput("sec")
+        .setCheck(null)
+        .appendField("將在");
     this.appendDummyInput()
-        .appendField("移動")
+        .appendField("秒內")
         .appendField(new Blockly.FieldVariable("actor"), "actor");
     this.appendValueInput("x1")
         .setCheck(null)
-        .appendField("從座標 x:");
+        .appendField("從座標 x1:");
     this.appendValueInput("y1")
         .setCheck(null)
-        .appendField(" y:");
+        .appendField(" y1:");
     this.appendValueInput("x2")
         .setCheck(null)
-        .appendField("到座標 x2:");
+        .appendField("移動到座標 x2:");
     this.appendValueInput("y2")
         .setCheck(null)
         .appendField(" y2:");
-    this.appendValueInput("sec")
-        .setCheck(null)
-        .appendField("每");
-    this.appendValueInput("pixel")
-        .setCheck(null)
-        .appendField("秒，間距");
     this.setInputsInline(true);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);

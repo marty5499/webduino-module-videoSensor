@@ -87,11 +87,8 @@ Blockly.JavaScript['waspot_move_between_actor'] = function (block) {
   var value_y1 = Blockly.JavaScript.valueToCode(block, 'y1', Blockly.JavaScript.ORDER_ATOMIC);
   var value_x2 = Blockly.JavaScript.valueToCode(block, 'x2', Blockly.JavaScript.ORDER_ATOMIC);
   var value_y2 = Blockly.JavaScript.valueToCode(block, 'y2', Blockly.JavaScript.ORDER_ATOMIC);
-
   var value_sec = Blockly.JavaScript.valueToCode(block, 'sec', Blockly.JavaScript.ORDER_ATOMIC);
-  var value_pixel = Blockly.JavaScript.valueToCode(block, 'pixel', Blockly.JavaScript.ORDER_ATOMIC);
-
-  var code = variable_actor + '.moveBetween(' + value_x1 + ',' + value_y1 + ',' + value_x2 + ',' + value_y2 + ',' + value_sec + ',' + value_pixel + ');\n';
+  var code = variable_actor + '.moveBetween(' + value_x1 + ',' + value_y1 + ',' + value_x2 + ',' + value_y2 + ',' + value_sec + ');\n';
   return code;
 };
 

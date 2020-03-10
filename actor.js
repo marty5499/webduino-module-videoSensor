@@ -170,12 +170,7 @@ class Actor {
     return this;
   }
 
-  /*
-    1. n秒內從A點移動到B點
-    2. 移動可能是1 pixel
-    3. 
-  */
-  moveBetween(x1, y1, x2, y2, sec, pixel) {
+  moveBetween(x1, y1, x2, y2, sec) {
     if (this.removed) {
       return this;
     }
@@ -188,8 +183,8 @@ class Actor {
     }
 
     var totalTime = sec * 1000;
-    var x_dist = (x2 - x1) / pixel;
-    var y_dist = (y2 - y1) / pixel;
+    var x_dist = (x2 - x1);
+    var y_dist = (y2 - y1);
     var self = this;
     var moveTime = 30;
     var cnt = totalTime / moveTime;
