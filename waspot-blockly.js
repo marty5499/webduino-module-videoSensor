@@ -17,16 +17,18 @@
     return videlem;
   }
 
-  window.createCamera = function (camSource, width, height, rotate, flip) {
+  window.createCamera = function (camSource, width, height, rotate, flip, opacity) {
     function pageX(elem) {
       return elem.offsetParent ? elem.offsetLeft + pageX(elem.offsetParent) : elem.offsetLeft;
     }
+
     function pageY(elem) {
       return elem.offsetParent ? elem.offsetTop + pageY(elem.offsetParent) : elem.offsetTop;
     }
     var c1 = document.createElement('canvas');
     c1.width = width;
     c1.height = height;
+    c1.style.opacity = opacity;
     document.body.appendChild(c1);
     var cam = new Camera(camSource);
     cam.setFlip(flip);

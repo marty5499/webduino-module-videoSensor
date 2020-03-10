@@ -214,6 +214,39 @@ Blockly.Blocks['waspot_move_actor'] = {
   }
 };
 
+//https://blockly-demo.appspot.com/static/demos/blockfactory_old/index.html#z4scj4
+Blockly.Blocks['waspot_move_between_actor'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("移動")
+        .appendField(new Blockly.FieldVariable("actor"), "actor");
+    this.appendValueInput("x1")
+        .setCheck(null)
+        .appendField("從座標 x:");
+    this.appendValueInput("y1")
+        .setCheck(null)
+        .appendField(" y:");
+    this.appendValueInput("x2")
+        .setCheck(null)
+        .appendField("到座標 x2:");
+    this.appendValueInput("y2")
+        .setCheck(null)
+        .appendField(" y2:");
+    this.appendValueInput("sec")
+        .setCheck(null)
+        .appendField("每");
+    this.appendValueInput("pixel")
+        .setCheck(null)
+        .appendField("秒，間距");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(120);
+    this.setTooltip('');
+    this.setHelpUrl('https://webduino.io/');
+  }
+};
+
 Blockly.Blocks['waspot_set_image_size'] = {
   init: function () {
     this.appendDummyInput()
@@ -277,7 +310,9 @@ Blockly.Blocks['waspot_get_camera'] = {
       .appendField(" 旋轉鏡頭：")
       .appendField(new Blockly.FieldCheckbox("FALSE"), "rotate")
       .appendField(" 水平翻轉：")
-      .appendField(new Blockly.FieldCheckbox("TRUE"), "flip");
+      .appendField(new Blockly.FieldCheckbox("TRUE"), "flip")
+      .appendField(" 透明度：")
+      .appendField(new Blockly.FieldDropdown([["10%", "0.1"], ["30%", "0.3"], ["70%", "0.5"], ["100%", "1"]]), "opacity");
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour(330);

@@ -81,6 +81,20 @@ Blockly.JavaScript['waspot_move_actor'] = function (block) {
   return code;
 };
 
+Blockly.JavaScript['waspot_move_between_actor'] = function (block) {
+  var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
+  var value_x1 = Blockly.JavaScript.valueToCode(block, 'x1', Blockly.JavaScript.ORDER_ATOMIC);
+  var value_y1 = Blockly.JavaScript.valueToCode(block, 'y1', Blockly.JavaScript.ORDER_ATOMIC);
+  var value_x2 = Blockly.JavaScript.valueToCode(block, 'x2', Blockly.JavaScript.ORDER_ATOMIC);
+  var value_y2 = Blockly.JavaScript.valueToCode(block, 'y2', Blockly.JavaScript.ORDER_ATOMIC);
+
+  var value_sec = Blockly.JavaScript.valueToCode(block, 'sec', Blockly.JavaScript.ORDER_ATOMIC);
+  var value_pixel = Blockly.JavaScript.valueToCode(block, 'pixel', Blockly.JavaScript.ORDER_ATOMIC);
+
+  var code = variable_actor + '.moveBetween(' + value_x1 + ',' + value_y1 + ',' + value_x2 + ',' + value_y2 + ',' + value_sec + ',' + value_pixel + ');\n';
+  return code;
+};
+
 Blockly.JavaScript['waspot_set_snd_url_actor'] = function (block) {
   var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
   var value_sndurl = Blockly.JavaScript.valueToCode(block, 'sndURL', Blockly.JavaScript.ORDER_ATOMIC);
@@ -106,8 +120,8 @@ Blockly.JavaScript['waspot_create_actor'] = function (block) {
   var code = variable_actor + ' = new Actor(cv,{\n';
   code += '"stage":' + variable_camera + ',\n';
   code += '"img":' + text_imgURL + ',\n';
-  code += '"pos":[0,0,' + text_width + ',' + text_height + ']\n});\n';
-  code += variable_actor + '.start();\n';
+  code += '"pos":[-1,-1,' + text_width + ',' + text_height + ']\n});\n';
+  code += 'await ' + variable_actor + '.start();\n';
   return code;
 };
 
@@ -116,7 +130,8 @@ Blockly.JavaScript['waspot_get_camera'] = function (block) {
   var checkbox_rotate = block.getFieldValue('rotate') == 'TRUE' ? 90 : 0;
   var checkbox_flip = block.getFieldValue('flip') == 'TRUE';
   var screenSize = block.getFieldValue('screenSize');
+  var opacity = block.getFieldValue('opacity');
   var text_src = block.getFieldValue('src');
-  var code = variable_camera + ' = createCamera("' + text_src + '",' + screenSize + ',' + checkbox_rotate + ',' + checkbox_flip + ');\n';
+  var code = variable_camera + ' = createCamera("' + text_src + '",' + screenSize + ',' + checkbox_rotate + ',' + checkbox_flip + ',' + opacity + ');\n';
   return code;
 };

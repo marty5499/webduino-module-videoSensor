@@ -37,6 +37,38 @@
       </shadow>
     </value>
   </block>
+  <block type='waspot_move_between_actor'>
+    <value name="x1">
+      <shadow type="math_number">
+        <field name="NUM">10</field>
+      </shadow>
+    </value>
+    <value name="y1">
+      <shadow type="math_number">
+        <field name="NUM">10</field>
+      </shadow>
+    </value>
+    <value name="x2">
+      <shadow type="math_number">
+        <field name="NUM">100</field>
+      </shadow>
+    </value>
+    <value name="y2">
+      <shadow type="math_number">
+        <field name="NUM">100</field>
+      </shadow>
+    </value>
+    <value name="sec">
+      <shadow type="math_number">
+        <field name="NUM">0.1</field>
+      </shadow>
+    </value>
+    <value name="pixel">
+      <shadow type="math_number">
+        <field name="NUM">5</field>
+      </shadow>
+    </value>
+  </block>
   <block type='waspot_touch_actor'>
   </block>
   <block type='waspot_show_actor'>

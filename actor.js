@@ -8,6 +8,7 @@ class Actor {
     self.swapping = false;
     self.imgReady = false;
     self.touching = false;
+    self.removed = false;
     this.lastInsideTime = -1;
     self.stage = info.stage; // camera
     self.moveArray = [];
@@ -55,6 +56,7 @@ class Actor {
     var self = this;
     var lastPos = [self.x, self.y, self.width, self.height];
     self.setImg(url, lastPos, function () {
+      self.removed = true;
       self.tracking.stop();
       setTimeout(function () {
         self.hide();
@@ -111,9 +113,9 @@ class Actor {
     self.imgReady = false;
     self.img.onload = function () {
       self.imgReady = true;
-      this.style.position = 'absolute';
       var left = self.getCanvas().offsetLeft + pos[0];
       var top = self.getCanvas().offsetTop + pos[1];
+      this.style.position = 'absolute';
       this.style.left = left + 'px';
       this.style.top = top + 'px';
       self.body.appendChild(this);
@@ -141,6 +143,9 @@ class Actor {
   }
 
   moveTo(x, y) {
+    if (this.removed) {
+      return this;
+    }
     //support array [x,y]
     if (arguments.length == 1) {
       y = x[1];
@@ -149,6 +154,10 @@ class Actor {
     if (this.running) {
       this.x = x;
       this.y = y;
+      if (this.x < 0) {
+        this.img.style.display = 'none';
+        return;
+      }
       this.img.style.display = '';
       var offsetLeft = this.getCanvas().offsetLeft;
       var offsetTop = this.getCanvas().offsetTop;
@@ -159,6 +168,51 @@ class Actor {
       this.moveArray.push([x, y]);
     }
     return this;
+  }
+
+  /*
+    1. n秒內從A點移動到B點
+    2. 移動可能是1 pixel
+    3. 
+  */
+  moveBetween(x1, y1, x2, y2, sec, pixel) {
+    if (this.removed) {
+      return this;
+    }
+    if (!this.running) {
+      console.log("running first !")
+      return this;
+    }
+    if (this.x != x1 || this.y != y1) {
+      this.moveTo(x1, y1);
+    }
+
+    var totalTime = sec * 1000;
+    var x_dist = (x2 - x1) / pixel;
+    var y_dist = (y2 - y1) / pixel;
+    var self = this;
+    var moveTime = 30;
+    var cnt = totalTime / moveTime;
+    var move = setInterval(function () {
+      self.x = self.x + (x_dist / (totalTime / moveTime));
+      self.y = self.y + (y_dist / (totalTime / moveTime));
+      if (self.x < -1 || self.x > self.getCanvas().width) {
+        self.removed = true;
+        self.tracking.stop();
+        self.hide();
+      }
+      if (self.y < -1 || self.y > self.getCanvas().height) {
+        self.removed = true;
+        self.tracking.stop();
+        self.hide();
+      }
+      if (--cnt < 0 || self.removed) {
+        clearInterval(move);
+      } else {
+        self.moveTo(self.x, self.y);
+      }
+    }, moveTime);
+
   }
 
   isHide() {
@@ -203,23 +257,29 @@ class Actor {
     return this;
   }
 
-  start() {
+  async start() {
     var self = this;
-    self.stage.onReady(function () {
-      //console.log("stage ready , Actor start...", "0806");
-      self.tracking.start();
-      self.running = true;
-      for (var i = 0; i < self.moveArray.length; i++) {
-        self.moveTo(self.moveArray.pop());
-      }
-    });
-    self.stage.onCanvas(function (c) {
-      if (self.moveArray.length > 0 && self.imgReady) {
-        for (var i = 0; i < self.moveArray.length; i++) {
-          self.moveTo(self.moveArray.pop());
+    async function go() {
+      self.stage.onCanvas(function (c) {
+        if (self.moveArray.length > 0 && self.imgReady) {
+          for (var i = 0; i < self.moveArray.length; i++) {
+            self.moveTo(self.moveArray.pop());
+          }
         }
-      }
-      self.showTime();
-    });
+        self.showTime();
+      });
+
+      return new Promise((resolve, reject) => {
+        self.stage.onReady(function () {
+          self.tracking.start();
+          self.running = true;
+          for (var i = 0; i < self.moveArray.length; i++) {
+            self.moveTo(self.moveArray.pop());
+          }
+          resolve("Success");
+        });
+      })
+    }
+    await go();
   }
 }
