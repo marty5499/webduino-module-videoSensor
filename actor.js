@@ -20,6 +20,7 @@ class Actor {
     self.imgReady = false;
     self.touching = false;
     self.removed = false;
+    self.collisionObj = null;
     this.lastInsideTime = -1;
     self.stage = info.stage; // camera
     self.moveArray = [];
@@ -44,9 +45,7 @@ class Actor {
       "filter": ["e2", "g1", "d3"]
     };
     self.onTouchCallback = function () {};
-    self.onCollisionCallback = function (obj) {
-      console.log("obj collision:", obj);
-    };
+    self.onCollisionCallback = function (obj) {};
     self.setTracking({
       'inside': function (pos) {
         var nowTime = new Date().getTime();
@@ -67,17 +66,17 @@ class Actor {
   }
 
   stop() {
-    delete Actor.objs[this.id];
     this.removed = true;
     this.tracking.stop();
+    delete Actor.objs[this.id];
   }
 
 
   delete(url, switchTime) {
     var self = this;
     var lastPos = [self.x, self.y, self.width, self.height];
+    self.stop();
     self.setImg(url, lastPos, function () {
-      self.stop();
       setTimeout(function () {
         self.hide();
       }, self.jsonInfo.touchTime);
@@ -175,8 +174,9 @@ class Actor {
     for (const [key, obj] of Object.entries(Actor.objs)) {
       if (key == this.id) continue;
       var d = distance(obj);
-      if (d < (obj.width / 2 + this.width / 2) ||
-        d < (obj.height / 2 + this.height / 2)) {
+      if (d < (obj.width / 3 + this.width / 3) ||
+        d < (obj.height / 3 + this.height / 3)) {
+        this.collisionObj = obj;
         this.onCollisionCallback(obj);
         return true;
       }
@@ -272,7 +272,7 @@ class Actor {
     this.onTouchCallback = callback;
   }
 
-  onCollision(callback) {
+  onCollision(collisionCallback) {
     this.onCollisionCallback = collisionCallback;
   }
 

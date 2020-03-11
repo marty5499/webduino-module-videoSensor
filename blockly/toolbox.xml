@@ -71,6 +71,10 @@
   </block>
   <block type='waspot_touch_actor'>
   </block>
+  <block type='waspot_collision_actor'>
+  </block>
+  <block type='waspot_by_collision_actor'>
+  </block>
   <block type='waspot_show_actor'>
   </block>
   <block type='waspot_loadimg_actor'>

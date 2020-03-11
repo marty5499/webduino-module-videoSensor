@@ -117,7 +117,25 @@ Blockly.Blocks['waspot_touch_actor'] = {
     this.appendDummyInput()
       .appendField("當")
       .appendField(new Blockly.FieldVariable("actor"), "actor")
-      .appendField("被碰到時");
+      .appendField("被影像碰到時");
+    this.appendStatementInput("inside")
+      .setCheck(null)
+      .appendField("執行");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(30);
+    this.setTooltip('');
+    this.setHelpUrl('https://webduino.io/');
+  }
+};
+
+//https://blockly-demo.appspot.com/static/demos/blockfactory_old/index.html#eb4ter
+Blockly.Blocks['waspot_collision_actor'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("當")
+      .appendField(new Blockly.FieldVariable("actor"), "actor")
+      .appendField("被圖片碰撞時");
     this.appendStatementInput("inside")
       .setCheck(null)
       .appendField("執行");
@@ -315,5 +333,19 @@ Blockly.Blocks['waspot_get_camera'] = {
     this.setColour(330);
     this.setTooltip('');
     this.setHelpUrl('https://webduino.io/');
+  }
+};
+
+//https://blockly-demo.appspot.com/static/demos/blockfactory_old/index.html#qwwhu8
+Blockly.Blocks['waspot_by_collision_actor'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldVariable("actor"), "actor")
+        .appendField("碰撞的圖片");
+    this.setInputsInline(true);
+    this.setOutput(true, null);
+    this.setColour(30);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
   }
 };

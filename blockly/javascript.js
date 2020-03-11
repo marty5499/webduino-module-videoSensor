@@ -42,11 +42,27 @@ Blockly.JavaScript['waspot_touch_actor'] = function (block) {
   var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
   var statements_inside = Blockly.JavaScript.statementToCode(block, 'inside');
   var code = variable_actor + '.onTouch(\n';
-  code += 'async function(pos){\n';
+  code += 'function(pos){\n';
   code += statements_inside;
   code += '\n});\n';
   return code;
 };
+
+Blockly.JavaScript['waspot_collision_actor'] = function (block) {
+  var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
+  var statements_inside = Blockly.JavaScript.statementToCode(block, 'inside');
+  var code = variable_actor + '.onCollision(\n';
+  code += 'function(){\n';
+  code += statements_inside;
+  code += '\n});\n';
+  return code;
+};
+
+Blockly.JavaScript['waspot_by_collision_actor'] = function(block) {
+  var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
+  var code = variable_actor+'.collisionObj';
+  return [code, Blockly.JavaScript.ORDER_NONE];
+}
 
 Blockly.JavaScript['waspot_reloadimg_actor'] = function (block) {
   var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
@@ -61,7 +77,8 @@ Blockly.JavaScript['waspot_delete_actor'] = function (block) {
   var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
   var value_imgurl = Blockly.JavaScript.valueToCode(block, 'imgURL', Blockly.JavaScript.ORDER_ATOMIC);
   var value_after = Blockly.JavaScript.valueToCode(block, 'after', Blockly.JavaScript.ORDER_ATOMIC);
-  var code = variable_actor + '.delete.call(this,' + value_imgurl + ',' + value_after + ');\n';
+  //var code = variable_actor + '.delete.call(this,' + value_imgurl + ',' + value_after + ');\n';
+  var code = variable_actor + '.delete(' + value_imgurl + ',' + value_after + ');\n';
   return code;
 };
 
