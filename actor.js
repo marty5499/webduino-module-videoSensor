@@ -1,6 +1,17 @@
 class Actor {
+
+  static create(obj) {
+    if (!Actor.idx) {
+      Actor.idx = 0;
+      Actor.objs = {};
+    }
+    Actor.idx++;
+    Actor.objs[Actor.idx] = obj;
+    return Actor.idx;
+  }
   constructor(cv, info) {
     var self = this;
+    self.id = Actor.create(this);
     self.running = false;
     self.cv = cv;
     self.info = info;
@@ -33,6 +44,9 @@ class Actor {
       "filter": ["e2", "g1", "d3"]
     };
     self.onTouchCallback = function () {};
+    self.onCollisionCallback = function (obj) {
+      console.log("obj collision:", obj);
+    };
     self.setTracking({
       'inside': function (pos) {
         var nowTime = new Date().getTime();
@@ -52,12 +66,18 @@ class Actor {
     });
   }
 
+  stop() {
+    delete Actor.objs[this.id];
+    this.removed = true;
+    this.tracking.stop();
+  }
+
+
   delete(url, switchTime) {
     var self = this;
     var lastPos = [self.x, self.y, self.width, self.height];
     self.setImg(url, lastPos, function () {
-      self.removed = true;
-      self.tracking.stop();
+      self.stop();
       setTimeout(function () {
         self.hide();
       }, self.jsonInfo.touchTime);
@@ -142,6 +162,29 @@ class Actor {
     return this.stage.getCanvas();
   }
 
+  checkCollision() {
+    var x = this.x + (this.width / 2);
+    var y = this.y + (this.height / 2);
+
+    function distance(obj) {
+      var objX = obj.x + obj.width / 2;
+      var objY = obj.y + obj.height / 2;
+      return Math.sqrt((objX - x) * (objX - x) + (objY - y) * (objY - y));
+    }
+    if (this.id != 1) return false;
+    for (const [key, obj] of Object.entries(Actor.objs)) {
+      if (key == this.id) continue;
+      var d = distance(obj);
+      if (d < (obj.width / 2 + this.width / 2) ||
+        d < (obj.height / 2 + this.height / 2)) {
+        this.onCollisionCallback(obj);
+        return true;
+      }
+    }
+    return false;
+  }
+
+
   moveTo(x, y) {
     if (this.removed) {
       return this;
@@ -164,6 +207,7 @@ class Actor {
       this.img.style.left = offsetLeft + this.x + "px";
       this.img.style.top = offsetTop + this.y + "px";
       this.tracking.moveTo(x, y);
+      this.checkCollision();
     } else {
       this.moveArray.push([x, y]);
     }
@@ -192,13 +236,11 @@ class Actor {
       self.x = self.x + (x_dist / (totalTime / moveTime));
       self.y = self.y + (y_dist / (totalTime / moveTime));
       if (self.x < -1 || self.x > self.getCanvas().width) {
-        self.removed = true;
-        self.tracking.stop();
+        self.stop();
         self.hide();
       }
       if (self.y < -1 || self.y > self.getCanvas().height) {
-        self.removed = true;
-        self.tracking.stop();
+        self.stop();
         self.hide();
       }
       if (--cnt < 0 || self.removed) {
@@ -228,6 +270,10 @@ class Actor {
 
   onTouch(callback) {
     this.onTouchCallback = callback;
+  }
+
+  onCollision(callback) {
+    this.onCollisionCallback = collisionCallback;
   }
 
   setTracking(callback) {
