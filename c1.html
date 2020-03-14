@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+
+<head>
+  <script src="https://127.0.0.1:8080/camera.js"></script>
+  <script src="https://127.0.0.1:8080/opencv.js"></script>
+  <script src="https://127.0.0.1:8080/imageFilter.js"></script>
+  <script src="https://127.0.0.1:8080/actor.js"></script>
+  <script src="https://127.0.0.1:8080/HotSpot.js"></script>
+  <script src="https://127.0.0.1:8080/waspot-blockly.js"></script>
+</head>
+
+<body>
+  <div><span id="demo-area-01-show">123</span></div>
+  <script>
+  (async function () {
+
+    var camera;
+    var rock;
+    var time;
+    var damage;
+    var rocket;
+    var coll;
+
+    function math_random_int(a, b) {
+      if (a > b) {
+        // Swap a and b to ensure a is smaller.
+        var c = a;
+        a = b;
+        b = c;
+      }
+      return Math.floor(Math.random() * (b - a + 1) + a);
+    }
+
+    async function createRocket() {
+      rocket = new Actor(cv, {
+        "stage": camera,
+        "img": 'https://marty5499.github.io/webduino-module-videoSensor/rocket.png',
+        "pos": [-1, -1, 64, 64],
+
+      });
+      await rocket.start();
+      rocket.moveBetween(250, 420, 250, -1, 3);
+      rocket.onCollision(
+        function () {
+          damage = damage + 1;
+          document.getElementById('demo-area-01-show').innerHTML = (String('碰撞次數：') + String(damage));
+          coll = (rocket.collisionObj);
+          coll.delete('https://pa1.narvii.com/6703/f3e528e85c4e34f3bce8684dc6fe8d4dfa0a0e62_00.gif', 0.5);
+          if (damage > 3) {
+            document.getElementById('demo-area-01-show').innerHTML = '火箭爆炸了..';
+            rocket.delete('https://pa1.narvii.com/6703/f3e528e85c4e34f3bce8684dc6fe8d4dfa0a0e62_00.gif', 0.5);
+          }
+        });
+    }
+
+    async function RL(rock, time) {
+      rock = new Actor(cv, {
+        "stage": camera,
+        "img": 'rock.gif',
+        "pos": [-1, -1, 24, 24]
+      });
+      await rock.start();
+      rock.moveBetween(640, (math_random_int(0, 400)), -5, (math_random_int(0, 400)), time);
+      //*
+      rock.onTouch(
+        function (pos) {
+        //rock.delete('explosion.gif', 0.5);
+        });
+       //*/
+    }
+
+    async function LR(rock, time) {
+      rock = new Actor(cv, {
+        "stage": camera,
+        "img": 'rock.gif',
+        "pos": [-1, -1, 24, 24]
+      });
+      await rock.start();
+      rock.moveBetween(0, (math_random_int(50, 460)), 645, (math_random_int(0, 400)), time);
+      //*
+      rock.onTouch(
+        function (pos) {
+          //rock.delete('explosion.gif', 0.5);
+        });
+      //*/
+    }
+
+
+    camera = await createCamera("0", 640, 480, 0, true, 0.1);
+    damage = 0;
+    document.getElementById('demo-area-01-show').innerHTML = (String('碰撞次數：') + String(damage));
+      createRocket();
+      for (var count = 0; count < 10; count++) {
+        LR(rock, math_random_int(2, 5));
+        RL(rock, math_random_int(2, 5));
+      }
+  }());
+  </script>
+</body>
