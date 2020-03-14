@@ -35,7 +35,7 @@
     async function createRocket() {
       rocket = new Actor(cv, {
         "stage": camera,
-        "img": 'https://marty5499.github.io/webduino-module-videoSensor/rocket.png',
+        "img": 'rocket.png',
         "pos": [-1, -1, 64, 64],
 
       });
@@ -46,10 +46,10 @@
           damage = damage + 1;
           document.getElementById('demo-area-01-show').innerHTML = (String('碰撞次數：') + String(damage));
           coll = (rocket.collisionObj);
-          coll.delete('https://pa1.narvii.com/6703/f3e528e85c4e34f3bce8684dc6fe8d4dfa0a0e62_00.gif', 0.5);
+          coll.delete('explosion.gif', 0.5);
           if (damage > 3) {
             document.getElementById('demo-area-01-show').innerHTML = '火箭爆炸了..';
-            rocket.delete('https://pa1.narvii.com/6703/f3e528e85c4e34f3bce8684dc6fe8d4dfa0a0e62_00.gif', 0.5);
+            rocket.delete('explosion.gif', 0.5);
           }
         });
     }
