@@ -4,15 +4,74 @@ class Actor {
     if (!Actor.idx) {
       Actor.idx = 0;
       Actor.objs = {};
+      //Actor.createThread();
     }
     Actor.idx++;
     Actor.objs[Actor.idx] = obj;
     return Actor.idx;
   }
+
+  static createThread() {
+    Actor.nowTime = Date.now();
+    Actor.lastTime = 0;
+
+    var loop = function () {
+      if (Actor.nowTime - Actor.lastTime < 30) {
+        Actor.nowTime = Date.now();
+        requestAnimationFrame(loop);
+        return;
+      }
+      Actor.lastTime = Actor.nowTime;
+      for (let key in Actor.objs) {
+        var actor = Actor.objs[key];
+        if (actor.moving) {
+          actor.run();
+        }
+      }
+      Actor.nowTime = Date.now();
+      requestAnimationFrame(loop);
+    }
+    setTimeout(loop, 0);
+    /*
+    setInterval(function () {
+      Actor.nowTime = Date.now();
+      for (let key in Actor.objs) {
+        var actor = Actor.objs[key];
+        if (actor.moving) {
+          actor.run();
+        }
+      }
+      console.log("spendTime:", Actor.nowTime - Actor.lastTime);
+      Actor.lastTime = Actor.nowTime;
+    }, 10);
+    //*/
+  }
+
+  moveBetween(x1, y1, x2, y2, sec) {
+    if (this.removed) {
+      return this;
+    }
+    if (this.x != x1 || this.y != y1) {
+      this.moveTo(x1, y1);
+    }
+    var self = this;
+    self.moveTotalTime = sec * 30;
+    self.moveCnt = 0;
+    self.xEnd = x2;
+    self.yEnd = y2;
+    self.x_dist = x2 - x1;
+    self.y_dist = y2 - y1;
+    var xDist = Math.abs(self.x_dist);
+    var yDist = Math.abs(self.y_dist);
+    self.runStepX = self.x_dist / self.moveTotalTime;
+    self.runStepY = self.y_dist / self.moveTotalTime;
+    self.moving = true;
+  }
+
   constructor(cv, info) {
+    Actor.timeFrame = 10;
     var self = this;
     self.id = Actor.create(this);
-    self.running = false;
     self.cv = cv;
     self.info = info;
     self.img = null;
@@ -20,10 +79,12 @@ class Actor {
     self.imgReady = false;
     self.touching = false;
     self.removed = false;
+    self.moving = false;
+    self.runStepX = 1; //移動流暢度,最快每ms移動1點
+    self.runStepY = 1; //移動流暢度,最快每ms移動1點
     self.collisionObj = null;
     this.lastInsideTime = -1;
     self.stage = info.stage; // camera
-    self.moveArray = [];
     self.isFlip = self.stage.getFlip();
     self.body = document.getElementsByTagName('body')[0];
     self.originImgURL = info.img;
@@ -40,7 +101,7 @@ class Actor {
       "varThreshold": 25,
       "learningRate": 0.001,
       "detectShadows": false,
-      "objMinSize": 3,
+      "objMinSize": 10,
       "touchTime": 1000,
       "filter": ["e2", "g1", "d3"]
     };
@@ -138,7 +199,6 @@ class Actor {
       this.style.left = left + 'px';
       this.style.top = top + 'px';
       self.body.appendChild(this);
-      self.moveArray.push([self.x, self.y]);
       if (typeof callback != 'undefined') {
         callback();
       }
@@ -186,6 +246,7 @@ class Actor {
 
 
   moveTo(x, y) {
+    var self = this;
     if (this.removed) {
       return this;
     }
@@ -194,63 +255,52 @@ class Actor {
       y = x[1];
       x = x[0];
     }
-    if (this.running) {
-      this.x = x;
-      this.y = y;
-      if (this.x < 0) {
-        this.img.style.display = 'none';
-        return;
-      }
-      this.img.style.display = '';
-      var offsetLeft = this.getCanvas().offsetLeft;
-      var offsetTop = this.getCanvas().offsetTop;
-      this.img.style.left = offsetLeft + this.x + "px";
-      this.img.style.top = offsetTop + this.y + "px";
-      this.tracking.moveTo(x, y);
-      this.checkCollision();
-    } else {
-      this.moveArray.push([x, y]);
+    this.x = x;
+    this.y = y;
+    if (this.x < 0) {
+      this.img.style.display = 'none';
+      return;
     }
+    self.img.style.display = '';
+    requestAnimationFrame(function () {
+      var offsetLeft = self.getCanvas().offsetLeft;
+      var offsetTop = self.getCanvas().offsetTop;
+      self.img.style.left = offsetLeft + self.x + "px";
+      self.img.style.top = offsetTop + self.y + "px";
+      self.tracking.moveTo(x, y);
+    });
+    this.checkCollision();
     return this;
   }
 
-  moveBetween(x1, y1, x2, y2, sec) {
-    if (this.removed) {
-      return this;
-    }
-    if (!this.running) {
-      console.log("running first !")
-      return this;
-    }
-    if (this.x != x1 || this.y != y1) {
-      this.moveTo(x1, y1);
-    }
-
-    var totalTime = sec * 1000;
-    var x_dist = (x2 - x1);
-    var y_dist = (y2 - y1);
+  run() {
     var self = this;
-    var moveTime = 30;
-    var cnt = totalTime / moveTime;
-    var move = setInterval(function () {
-      self.x = self.x + (x_dist / (totalTime / moveTime));
-      self.y = self.y + (y_dist / (totalTime / moveTime));
-      if (self.x < -1 || self.x > self.getCanvas().width) {
-        self.stop();
-        self.hide();
-      }
-      if (self.y < -1 || self.y > self.getCanvas().height) {
-        self.stop();
-        self.hide();
-      }
-      if (--cnt < 0 || self.removed) {
-        clearInterval(move);
-      } else {
-        self.moveTo(self.x, self.y);
-      }
-    }, moveTime);
-
+    //console.log(self.runStepX, ',', self.runStepY, 'pixel/ms');
+    var newX = self.x + self.runStepX;
+    var newY = self.y + self.runStepY;
+    if (parseInt(self.x) == parseInt(newX) &&
+      parseInt(self.y) == parseInt(newY)) {
+      self.x = newX;
+      self.y = newY;
+      return;
+    }
+    self.x = newX;
+    self.y = newY;
+    if ((self.x < 0 || self.x > self.getCanvas().width) ||
+      self.y < 0 || self.y > self.getCanvas().height) {
+      self.stop();
+      self.hide();
+      return;
+    }
+    var x = parseInt(x);
+    var y = parseInt(y);
+    if ((x == self.xEnd && y == self.yEnd) || self.removed) {
+      self.moving = false;
+    } else {
+      self.moveTo(self.x, self.y);
+    }
   }
+
 
   isHide() {
     return this.img.style.display == 'none';
@@ -298,29 +348,29 @@ class Actor {
     return this;
   }
 
-  async start() {
+  start() {
     var self = this;
-    async function go() {
-      self.stage.onCanvas(function (c) {
-        if (self.moveArray.length > 0 && self.imgReady) {
-          for (var i = 0; i < self.moveArray.length; i++) {
-            self.moveTo(self.moveArray.pop());
+    self.stage.onCanvas(function (canvas, video, idx, amt) {
+      //*/
+      self.showTime();
+      if (idx + 1 == amt) {
+        if (Actor.nowTime - Actor.lastTime < 30) {
+          Actor.nowTime = Date.now();
+          return;
+        }
+        Actor.lastTime = Actor.nowTime;
+        for (let key in Actor.objs) {
+          var actor = Actor.objs[key];
+          if (actor.moving) {
+            actor.run();
           }
         }
-        self.showTime();
-      });
-
-      return new Promise((resolve, reject) => {
-        self.stage.onReady(function () {
-          self.tracking.start();
-          self.running = true;
-          for (var i = 0; i < self.moveArray.length; i++) {
-            self.moveTo(self.moveArray.pop());
-          }
-          resolve("Success");
-        });
-      })
-    }
-    await go();
+        Actor.nowTime = Date.now();
+      }
+      //*/
+    });
+    self.tracking.start();
+    self.running = true;
   }
+
 }

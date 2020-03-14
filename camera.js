@@ -62,6 +62,16 @@ var Camera = (function () {
       }
     }
 
+    async start(cb) {
+      var self = this;
+      return new Promise((resolve, reject) => {
+        self.onCanvas(function () {
+          self.onCanvasCallbackList.pop();
+          resolve("ready2go");
+        });
+      });
+    }
+
     setCanvas(canvas) {
       if (typeof canvas == 'string') {
         canvas = document.getElementById(canvas);
@@ -227,7 +237,15 @@ var Camera = (function () {
             var video = self.createVideo();
             window.remoteVideo = self.video = video;
             video.onloadeddata = function () {
+              var nowTime = Date.now();
+              var lastTime = nowTime;
               var loop = function () {
+                if (nowTime - lastTime < 30) {
+                  nowTime = Date.now();
+                  requestAnimationFrame(loop);
+                  return;
+                }
+                lastTime = nowTime;
                 if (self.cnt++ == 30 /* skip 30 frame*/ ) {
                   for (var i = 0; i < self.onReadyCallbackList.length; i++) {
                     self.onReadyCallbackList[i]();
@@ -237,9 +255,10 @@ var Camera = (function () {
                 self.rotateImg(video, canvas, self.rotate, true);
                 if (self.onCanvasCallbackList.length > 0) {
                   for (var i = 0; i < self.onCanvasCallbackList.length; i++) {
-                    self.onCanvasCallbackList[i](self.canvas, video);
+                    self.onCanvasCallbackList[i](self.canvas, video, i, self.onCanvasCallbackList.length);
                   }
                 }
+                nowTime = Date.now();
                 requestAnimationFrame(loop);
               }
               requestAnimationFrame(loop);

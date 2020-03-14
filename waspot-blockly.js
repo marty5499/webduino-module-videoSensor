@@ -17,7 +17,7 @@
     return videlem;
   }
 
-  window.createCamera = function (camSource, width, height, rotate, flip, opacity) {
+  window.createCamera = async function (camSource, width, height, rotate, flip, opacity) {
     function pageX(elem) {
       return elem.offsetParent ? elem.offsetLeft + pageX(elem.offsetParent) : elem.offsetLeft;
     }
@@ -36,6 +36,7 @@
     if (rotate) {
       cam.setRotate(90);
     }
+    await cam.start();
     return cam;
   }
 }(window, window.webduino));
