@@ -146,6 +146,6 @@ Blockly.JavaScript['waspot_get_camera'] = function (block) {
   var screenSize = block.getFieldValue('screenSize');
   var opacity = block.getFieldValue('opacity');
   var text_src = block.getFieldValue('src');
-  var code = variable_camera + ' = createCamera("' + text_src + '",' + screenSize + ',' + checkbox_rotate + ',' + checkbox_flip + ',' + opacity + ');\n';
+  var code = variable_camera + ' = await createCamera("' + text_src + '",' + screenSize + ',' + checkbox_rotate + ',' + checkbox_flip + ',' + opacity + ');\n';
   return code;
 };
