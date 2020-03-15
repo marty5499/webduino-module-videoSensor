@@ -4,47 +4,10 @@ class Actor {
     if (!Actor.idx) {
       Actor.idx = 0;
       Actor.objs = {};
-      //Actor.createThread();
     }
     Actor.idx++;
     Actor.objs[Actor.idx] = obj;
     return Actor.idx;
-  }
-
-  static createThread() {
-    Actor.nowTime = Date.now();
-    Actor.lastTime = 0;
-
-    var loop = function () {
-      if (Actor.nowTime - Actor.lastTime < 30) {
-        Actor.nowTime = Date.now();
-        requestAnimationFrame(loop);
-        return;
-      }
-      Actor.lastTime = Actor.nowTime;
-      for (let key in Actor.objs) {
-        var actor = Actor.objs[key];
-        if (actor.moving) {
-          actor.run();
-        }
-      }
-      Actor.nowTime = Date.now();
-      requestAnimationFrame(loop);
-    }
-    setTimeout(loop, 0);
-    /*
-    setInterval(function () {
-      Actor.nowTime = Date.now();
-      for (let key in Actor.objs) {
-        var actor = Actor.objs[key];
-        if (actor.moving) {
-          actor.run();
-        }
-      }
-      console.log("spendTime:", Actor.nowTime - Actor.lastTime);
-      Actor.lastTime = Actor.nowTime;
-    }, 10);
-    //*/
   }
 
   moveBetween(x1, y1, x2, y2, sec) {
@@ -55,16 +18,13 @@ class Actor {
       this.moveTo(x1, y1);
     }
     var self = this;
-    self.moveTotalTime = sec * 30;
     self.moveCnt = 0;
     self.xEnd = x2;
     self.yEnd = y2;
     self.x_dist = x2 - x1;
     self.y_dist = y2 - y1;
-    var xDist = Math.abs(self.x_dist);
-    var yDist = Math.abs(self.y_dist);
-    self.runStepX = self.x_dist / self.moveTotalTime;
-    self.runStepY = self.y_dist / self.moveTotalTime;
+    self.runStepX = self.x_dist / (self.moveTotalTime*sec);
+    self.runStepY = self.y_dist / (self.moveTotalTime*sec);
     self.moving = true;
   }
 
@@ -83,7 +43,7 @@ class Actor {
     self.runStepX = 1; //移動流暢度,最快每ms移動1點
     self.runStepY = 1; //移動流暢度,最快每ms移動1點
     self.collisionObj = null;
-    this.lastInsideTime = -1;
+    self.lastInsideTime = -1;
     self.stage = info.stage; // camera
     self.isFlip = self.stage.getFlip();
     self.body = document.getElementsByTagName('body')[0];
@@ -262,20 +222,19 @@ class Actor {
       return;
     }
     self.img.style.display = '';
-    requestAnimationFrame(function () {
+    //requestAnimationFrame(function () {
       var offsetLeft = self.getCanvas().offsetLeft;
       var offsetTop = self.getCanvas().offsetTop;
       self.img.style.left = offsetLeft + self.x + "px";
       self.img.style.top = offsetTop + self.y + "px";
       self.tracking.moveTo(x, y);
-    });
+    //});
     this.checkCollision();
     return this;
   }
 
   run() {
     var self = this;
-    //console.log(self.runStepX, ',', self.runStepY, 'pixel/ms');
     var newX = self.x + self.runStepX;
     var newY = self.y + self.runStepY;
     if (parseInt(self.x) == parseInt(newX) &&
@@ -286,6 +245,7 @@ class Actor {
     }
     self.x = newX;
     self.y = newY;
+    //超出邊界就停止偵測並隱藏
     if ((self.x < 0 || self.x > self.getCanvas().width) ||
       self.y < 0 || self.y > self.getCanvas().height) {
       self.stop();
@@ -350,9 +310,13 @@ class Actor {
 
   start() {
     var self = this;
+    self.moveTotalTime = 30;
+
     self.stage.onCanvas(function (canvas, video, idx, amt) {
-      //*/
       self.showTime();
+      //if (self.moving) self.run();
+
+      //*/
       if (idx + 1 == amt) {
         if (Actor.nowTime - Actor.lastTime < 30) {
           Actor.nowTime = Date.now();

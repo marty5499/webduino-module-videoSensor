@@ -240,7 +240,7 @@ var Camera = (function () {
               var nowTime = Date.now();
               var lastTime = nowTime;
               var loop = function () {
-                if (nowTime - lastTime < 30) {
+                if (nowTime - lastTime < 10) {
                   nowTime = Date.now();
                   requestAnimationFrame(loop);
                   return;
