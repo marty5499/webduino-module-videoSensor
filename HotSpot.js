@@ -57,25 +57,7 @@ class Hotspot {
     this.drawCanvas = targetCanvas; //顯示的畫布
     this.drawCtx = this.drawCanvas.getContext('2d');
     document.body.appendChild(this.canvas);
-    this.ctx.beginPath();
-    this.ctx.moveTo(x1, y1);
-    this.ctx.lineTo(x2, y2);
-    this.ctx.lineTo(x3, y3);
-    this.ctx.lineTo(x4, y4);
-    this.ctx.lineTo(x1, y1);
-    this.ctx.clip();
-    this.x1 = x1;
-    this.x2 = x2;
-    this.x3 = x3;
-    this.x4 = x4;
-    this.y1 = y1;
-    this.y2 = y2;
-    this.y3 = y3;
-    this.y4 = y4;
-    this.scanX = Math.min.apply(null, [x1, x2, x3, x4]);
-    this.scanY = Math.min.apply(null, [y1, y2, y3, y4]);
-    this.scanWidth = Math.max.apply(null, [x1, x2, x3, x4]) - this.scanX;
-    this.scanHeight = Math.max.apply(null, [y1, y2, y3, y4]) - this.scanY;
+    this.setImgClip(x1, y1, x2, y2, x3, y3, x4, y4);
     this.detectCB = this.in = this.out = function (pos, canvas) {};
     this.startDetect = false;
     this.firstDetect = true;
@@ -85,6 +67,10 @@ class Hotspot {
     this.lastPos = false;
     this.setTrackingStep(1); //異動量 1 pixel
     this.setShowArea(showArea);
+    /*/test
+    this.setShowArea(true);
+    this.setStroke(3, "#ff0000");
+    /////////////////////////////*/
     this.imgList = [];
     this.insideObjList = []; //目前區域內偵測到所有物件的座標
     this.res = {}; //儲存圖片、音效資源
@@ -95,20 +81,20 @@ class Hotspot {
     if (this.startDetect) {
       this.reset();
     } else {
-      var history = this.jsonInfo['history'];
-      var varThreshold = this.jsonInfo['varThreshold'];
-      var detectShadows = this.jsonInfo['detectShadows'];
+      this.history = this.jsonInfo['history'];
+      this.varThreshold = this.jsonInfo['varThreshold'];
+      this.detectShadows = this.jsonInfo['detectShadows'];
       this.objMinSize = this.jsonInfo['objMinSize'];
       this.filter = this.jsonInfo['filter'];
       this.learningRate = this.jsonInfo['learningRate'];
       if (typeof history == 'undefined') {
-        history = 500;
+        this.history = 500;
       }
       if (typeof varThreshold == 'undefined') {
-        varThreshold = 100;
+        this.varThreshold = 100;
       }
       if (typeof detectShadows == 'undefined') {
-        detectShadows = false;
+        this.detectShadows = false;
       }
       if (typeof this.jsonInfo['lineWidth'] != 'undefined') {
         this.lineWidth = this.jsonInfo['lineWidth'];
@@ -128,24 +114,13 @@ class Hotspot {
       if (this.bs != null) {
         this.bs.delete();
       }
-      this.bs = new cv.BackgroundSubtractorMOG2(history, varThreshold, detectShadows);
+      this.bs = new cv.BackgroundSubtractorMOG2(this.history, this.varThreshold, this.detectShadows);
       self.startDetect = true;
     }
   }
 
   debug() {
     this.showDectectCanvas = true;
-  }
-
-  reset() {
-    var self = this;
-    if (this.bs != null) {
-      this.bs.delete();
-    }
-    this.bs = new cv.BackgroundSubtractorMOG2(500, 160, false);
-    this.lastPos = false;
-    self.firstDetect = true;
-    self.resetImageCollision();
   }
 
   stop() {
@@ -166,7 +141,32 @@ class Hotspot {
     this.posMinStep = step;
   }
 
+  setImgClip(x1, y1, x2, y2, x3, y3, x4, y4) {
+    this.ctx.beginPath();
+    this.ctx.moveTo(x1, y1);
+    this.ctx.lineTo(x2, y2);
+    this.ctx.lineTo(x3, y3);
+    this.ctx.lineTo(x4, y4);
+    this.ctx.lineTo(x1, y1);
+    this.ctx.clip();
+    this.x1 = x1;
+    this.x2 = x2;
+    this.x3 = x3;
+    this.x4 = x4;
+    this.y1 = y1;
+    this.y2 = y2;
+    this.y3 = y3;
+    this.y4 = y4;
+    this.scanX = Math.min.apply(null, [x1, x2, x3, x4]);
+    this.scanY = Math.min.apply(null, [y1, y2, y3, y4]);
+    this.scanWidth = Math.max.apply(null, [x1, x2, x3, x4]) - this.scanX;
+    this.scanHeight = Math.max.apply(null, [y1, y2, y3, y4]) - this.scanY;
+  }
+
   moveTo(x, y) {
+    if (this.isFlip) {
+      //x = this.sourceCanvas.width - x - this.scanWidth;
+    }
     this.scanX = x;
     this.scanY = y;
     this.x1 = this.scanX;
@@ -177,7 +177,35 @@ class Hotspot {
     this.y3 = this.scanY + this.scanHeight;
     this.x4 = this.scanX;
     this.y4 = this.scanY + this.scanHeight;
-    this.reset();
+    this.setImgClip(
+      this.x1, this.y1,
+      this.x2, this.y2,
+      this.x3, this.y3,
+      this.x4, this.y4
+    );
+    //this.reset();
+    //this.scan();
+    //*
+    let src = cv.matFromImageData(this.getImageData());
+    let dstx = new this.cv.Mat();
+    for (var i = 0; i < 1; i++) {
+      this.bs.apply(src, dstx, 1); //去背偵測物件
+    }
+    src.delete();
+    dstx.delete();
+    //this.firstDetect = true;
+    //*/
+  }
+
+  reset() {
+    var self = this;
+    if (this.bs != null) {
+      this.bs.delete();
+    }
+    this.bs = new cv.BackgroundSubtractorMOG2(this.history, this.varThreshold, this.detectShadows);
+    this.lastPos = false;
+    self.firstDetect = true;
+    self.resetImageCollision();
   }
 
   setCvProcess(imgFilter) {
@@ -291,7 +319,14 @@ class Hotspot {
     }
     var posList = this.imgFilter.enclosingCircleMaxOne(dstx, this.objMinSize);
     dstx.delete();
-
+    /* test
+    if (posList.length > 0) {
+      console.log("detect collision.");
+    }
+    if (posList.length > 0) {
+      this.in(null, this.sourceCanvas);
+    }
+    //*/
     //*
     if (posList.length == 0 && this.lastPos != false) {
       this.out(this.lastPos, this.targetCanvas);

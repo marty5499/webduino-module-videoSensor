@@ -240,11 +240,13 @@ var Camera = (function () {
               var nowTime = Date.now();
               var lastTime = nowTime;
               var loop = function () {
-                if (nowTime - lastTime < 10) {
+                /*
+                if (nowTime - lastTime < 33) {
                   nowTime = Date.now();
                   requestAnimationFrame(loop);
                   return;
                 }
+                //*/
                 lastTime = nowTime;
                 if (self.cnt++ == 30 /* skip 30 frame*/ ) {
                   for (var i = 0; i < self.onReadyCallbackList.length; i++) {
