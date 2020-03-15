@@ -15,7 +15,7 @@ class Actor {
     Actor.nowTime = Date.now();
     Actor.lastTime = 0;
     var loop = function () {
-      if (Actor.nowTime - Actor.lastTime < 20) {
+      if (Actor.nowTime - Actor.lastTime < Actor.movePerSecond) {
         Actor.nowTime = Date.now();
         requestAnimationFrame(loop);
         return;
@@ -32,19 +32,6 @@ class Actor {
       requestAnimationFrame(loop);
     }
     setTimeout(loop, 0);
-    /*
-    setInterval(function () {
-      Actor.nowTime = Date.now();
-      for (let key in Actor.objs) {
-        var actor = Actor.objs[key];
-        if (actor.moving) {
-          actor.run();
-        }
-      }
-      console.log("spendTime:", Actor.nowTime - Actor.lastTime);
-      Actor.lastTime = Actor.nowTime;
-    }, 10);
-    //*/
   }
 
   moveBetween(x1, y1, x2, y2, sec) {
@@ -55,21 +42,20 @@ class Actor {
       this.moveTo(x1, y1);
     }
     var self = this;
-    self.moveTotalTime = sec * 30;
-    self.moveCnt = 0;
+    var moveTotalStep = sec * Actor.movePerSecond;
     self.xEnd = x2;
     self.yEnd = y2;
     self.x_dist = x2 - x1;
     self.y_dist = y2 - y1;
     var xDist = Math.abs(self.x_dist);
     var yDist = Math.abs(self.y_dist);
-    self.runStepX = self.x_dist / self.moveTotalTime;
-    self.runStepY = self.y_dist / self.moveTotalTime;
+    self.runStepX = self.x_dist / moveTotalStep;
+    self.runStepY = self.y_dist / moveTotalStep;
     self.moving = true;
   }
 
   constructor(cv, info) {
-    Actor.timeFrame = 10;
+    Actor.movePerSecond = 30;
     var self = this;
     self.id = Actor.create(this);
     self.cv = cv;
@@ -131,7 +117,6 @@ class Actor {
     this.tracking.stop();
     delete Actor.objs[this.id];
   }
-
 
   delete(url, switchTime) {
     var self = this;
@@ -224,7 +209,6 @@ class Actor {
   checkCollision() {
     var x = this.x + (this.width / 2);
     var y = this.y + (this.height / 2);
-
     function distance(obj) {
       var objX = obj.x + obj.width / 2;
       var objY = obj.y + obj.height / 2;
@@ -262,23 +246,19 @@ class Actor {
       return;
     }
     self.img.style.display = '';
-    //requestAnimationFrame(function () {
     var offsetLeft = self.getCanvas().offsetLeft;
     var offsetTop = self.getCanvas().offsetTop;
     self.img.style.left = offsetLeft + self.x + "px";
     self.img.style.top = offsetTop + self.y + "px";
     self.tracking.moveTo(x, y);
-    //});
     this.checkCollision();
     return this;
   }
 
   run() {
     var self = this;
-    //console.log(self.runStepX, ',', self.runStepY, 'pixel/ms');
     var newX = self.x + self.runStepX;
     var newY = self.y + self.runStepY;
-    //* test 
     if (parseInt(self.x) == parseInt(newX) &&
       parseInt(self.y) == parseInt(newY)) {
       self.x = newX;
@@ -300,9 +280,7 @@ class Actor {
     } else {
       self.moveTo(self.x, self.y);
     }
-    //*/
   }
-
 
   isHide() {
     return this.img.style.display == 'none';
@@ -340,7 +318,6 @@ class Actor {
     this.tracking.setFlip(this.isFlip);
     this.tracking.jsonInfo = this.jsonInfo;
     this.tracking.setCvProcess(this.cv.imgFilter);
-
     if (typeof callback['inside'] == "function") {
       this.tracking.inside(callback['inside']);
     }
@@ -351,28 +328,7 @@ class Actor {
   }
 
   start() {
-    var self = this;
-    self.stage.onCanvas(function (canvas, video, idx, amt) {
-      //self.showTime();
-      /*/
-      if (idx + 1 == amt) {
-        if (Actor.nowTime - Actor.lastTime < 30) {
-          Actor.nowTime = Date.now();
-          return;
-        }
-        Actor.lastTime = Actor.nowTime;
-        for (let key in Actor.objs) {
-          var actor = Actor.objs[key];
-          if (actor.moving) {
-            actor.run();
-          }
-        }
-        Actor.nowTime = Date.now();
-      }
-      //*/
-    });
-    self.tracking.start();
-    self.running = true;
+    this.tracking.start();
   }
 
 }

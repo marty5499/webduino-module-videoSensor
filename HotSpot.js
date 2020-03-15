@@ -67,10 +67,6 @@ class Hotspot {
     this.lastPos = false;
     this.setTrackingStep(1); //異動量 1 pixel
     this.setShowArea(showArea);
-    /*/test
-    this.setShowArea(true);
-    this.setStroke(3, "#ff0000");
-    /////////////////////////////*/
     this.imgList = [];
     this.insideObjList = []; //目前區域內偵測到所有物件的座標
     this.res = {}; //儲存圖片、音效資源
@@ -183,18 +179,11 @@ class Hotspot {
       this.x3, this.y3,
       this.x4, this.y4
     );
-    //this.reset();
-    //this.scan();
-    //*
     let src = cv.matFromImageData(this.getImageData());
     let dstx = new this.cv.Mat();
-    for (var i = 0; i < 1; i++) {
-      this.bs.apply(src, dstx, 1); //去背偵測物件
-    }
+      this.bs.apply(src, dstx, 1);
     src.delete();
     dstx.delete();
-    //this.firstDetect = true;
-    //*/
   }
 
   reset() {
@@ -211,14 +200,6 @@ class Hotspot {
   setCvProcess(imgFilter) {
     this.imgFilter = imgFilter;
     this.cv = imgFilter.getOpenCV();
-    let src = cv.matFromImageData(this.getImageData());
-    let dstx = new this.cv.Mat();
-    if (this.bs != null) {
-      this.bs.delete();
-    }
-    this.bs = new cv.BackgroundSubtractorMOG2(100, 500, false);
-    src.delete()
-    dstx.delete();
   }
 
   drawTrackingArea() {
@@ -319,14 +300,6 @@ class Hotspot {
     }
     var posList = this.imgFilter.enclosingCircleMaxOne(dstx, this.objMinSize);
     dstx.delete();
-    /* test
-    if (posList.length > 0) {
-      console.log("detect collision.");
-    }
-    if (posList.length > 0) {
-      this.in(null, this.sourceCanvas);
-    }
-    //*/
     //*
     if (posList.length == 0 && this.lastPos != false) {
       this.out(this.lastPos, this.targetCanvas);
