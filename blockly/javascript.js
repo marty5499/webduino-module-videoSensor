@@ -58,9 +58,9 @@ Blockly.JavaScript['waspot_collision_actor'] = function (block) {
   return code;
 };
 
-Blockly.JavaScript['waspot_by_collision_actor'] = function(block) {
+Blockly.JavaScript['waspot_by_collision_actor'] = function (block) {
   var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
-  var code = variable_actor+'.collisionObj';
+  var code = variable_actor + '.collisionObj';
   return [code, Blockly.JavaScript.ORDER_NONE];
 }
 
@@ -134,8 +134,8 @@ Blockly.JavaScript['waspot_create_actor'] = function (block) {
   var code = variable_actor + ' = new Actor(cv,{\n';
   code += '"stage":' + variable_camera + ',\n';
   code += '"img":' + text_imgURL + ',\n';
-  code += '"pos":[-1,-1,' + text_width + ',' + text_height + ']\n});\n';
-  code += 'await ' + variable_actor + '.start();\n';
+  code += '"pos":[ -1000, -1000,' + text_width + ',' + text_height + ']\n});\n';
+  code += variable_actor + '.start();\n';
   return code;
 };
 
