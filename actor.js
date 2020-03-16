@@ -89,7 +89,7 @@ class Actor {
       "detectShadows": false,
       "objMinSize": 10,
       "touchTime": 1000,
-      "filter": ["e2", "g1", "d3"]
+      "filter": [/*"e2", "g1", "d3"*/]
     };
     self.onTouchCallback = function () {};
     self.onCollisionCallback = function (obj) {};
