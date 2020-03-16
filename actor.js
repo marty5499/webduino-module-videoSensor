@@ -75,13 +75,12 @@ class Actor {
     self.body = document.getElementsByTagName('body')[0];
     self.originImgURL = info.img;
     self.originSize = [info.pos[3], info.pos[4]];
-    self.setImg(info.img, info.pos, function () {
-      self.hide();
-    });
+    self.setImg(info.img, info.pos);
     if (typeof info.snd == 'undefined') {
       info.snd = "";
+    } else {
+      self.audio = new Audio(info.snd);
     }
-    self.audio = new Audio(info.snd);
     self.jsonInfo = {
       "history": 100,
       "varThreshold": 25,
@@ -91,8 +90,8 @@ class Actor {
       "touchTime": 1000,
       "filter": [/*"e2", "g1", "d3"*/]
     };
-    self.onTouchCallback = function () {};
-    self.onCollisionCallback = function (obj) {};
+    self.onTouchCallback = function () { };
+    self.onCollisionCallback = function (obj) { };
     self.setTracking({
       'inside': function (pos) {
         var nowTime = new Date().getTime();
@@ -118,13 +117,14 @@ class Actor {
     delete Actor.objs[this.id];
   }
 
-  delete(url, switchTime) {
+  delete(url) {
     var self = this;
     var lastPos = [self.x, self.y, self.width, self.height];
     self.stop();
     self.setImg(url, lastPos, function () {
       setTimeout(function () {
-        self.hide();
+        var parentEle = self.img.parentElement;
+        parentEle.removeChild(self.img);
       }, self.jsonInfo.touchTime);
     });
   }
@@ -174,16 +174,17 @@ class Actor {
       parentEle.removeChild(self.img);
     }
     var canvas = self.stage.getCanvas();
-    self.img = new Image();
     self.imgReady = false;
+    self.img = new Image();
+    self.img.setAttribute('idx', self.id);
     self.img.onload = function () {
-      self.imgReady = true;
       var left = self.getCanvas().offsetLeft + pos[0];
       var top = self.getCanvas().offsetTop + pos[1];
       this.style.position = 'absolute';
       this.style.left = left + 'px';
       this.style.top = top + 'px';
       self.body.appendChild(this);
+      self.imgReady = true;
       if (typeof callback != 'undefined') {
         callback();
       }
@@ -241,15 +242,11 @@ class Actor {
     }
     this.x = x;
     this.y = y;
-    if (this.x < 0) {
-      this.img.style.display = 'none';
-      return;
-    }
     self.img.style.display = '';
     var offsetLeft = self.getCanvas().offsetLeft;
     var offsetTop = self.getCanvas().offsetTop;
-    self.img.style.left = offsetLeft + self.x + "px";
-    self.img.style.top = offsetTop + self.y + "px";
+    self.img.style.left = offsetLeft + parseInt(self.x) + "px";
+    self.img.style.top = offsetTop + parseInt(self.y) + "px";
     self.tracking.moveTo(x, y);
     this.checkCollision();
     return this;
@@ -267,10 +264,10 @@ class Actor {
     }
     self.x = newX;
     self.y = newY;
-    if ((self.x < 0 || self.x > self.getCanvas().width) ||
-      self.y < 0 || self.y > self.getCanvas().height) {
+    if ((self.x <= 0 || self.x > self.getCanvas().width) ||
+      (self.y <= 0 || self.y > self.getCanvas().height)) {
+      self.hide(true);
       self.stop();
-      self.hide();
       return;
     }
     var x = parseInt(x);
@@ -286,8 +283,16 @@ class Actor {
     return this.img.style.display == 'none';
   }
 
-  hide() {
+  hide(remove) {
     this.img.style.display = 'none';
+    if (remove) {
+      var self = this;
+      setTimeout(function () {
+        var parentEle = self.img.parentElement;
+        parentEle.removeChild(self.img);
+      }, 1000
+      );
+    }
   }
 
   show() {
