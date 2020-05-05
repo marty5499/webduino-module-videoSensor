@@ -124,7 +124,9 @@ class Actor {
     self.setImg(url, lastPos, function () {
       setTimeout(function () {
         var parentEle = self.img.parentElement;
-        parentEle.removeChild(self.img);
+        if (parentEle != null) {
+          parentEle.removeChild(self.img);
+        }
       }, self.jsonInfo.touchTime);
     });
   }

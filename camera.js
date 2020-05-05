@@ -104,18 +104,21 @@ var Camera = (function () {
     enumerateDevices(cb) {
       var self = this;
       return new Promise(function (resolve, reject) {
-        navigator.mediaDevices.enumerateDevices()
-          .then(function (o) {
-            self.gotDevices(self, o);
-            if (cb) cb();
-            resolve();
-          }).catch(self.handleError);
+        navigator.mediaDevices.getUserMedia({ video: true }).then(function (mediaStream) {
+          navigator.mediaDevices.enumerateDevices()
+            .then(function (o) {
+              self.gotDevices(self, o);
+              if (cb) cb();
+              resolve();
+            }).catch(self.handleError);
+        });
       });
     }
 
     gotDevices(self, deviceInfos) {
       for (var i = 0; i !== deviceInfos.length; ++i) {
         var deviceInfo = deviceInfos[i];
+        console.log(deviceInfo);
         if (deviceInfo.kind === 'videoinput') {
           self.cameraList.push(deviceInfo);
         }
@@ -145,15 +148,15 @@ var Camera = (function () {
           };
           var self = this;
           navigator.mediaDevices.getUserMedia(constraints).
-          then(function (stream) {
-            if (self.video) {
-              self.video.srcObject = stream;
-            }
-          }).catch(function (error) {
-            console.log('Error: ', error);
-          });
+            then(function (stream) {
+              if (self.video) {
+                self.video.srcObject = stream;
+              }
+            }).catch(function (error) {
+              console.log('Error: ', error);
+            });
           break;
-          /* WebRTC */
+        /* WebRTC */
         case wsCam:
           console.log("WebRTC:", this.camType);
           ConnectWebSocket(this.URL);
@@ -219,7 +222,7 @@ var Camera = (function () {
         eleOrId = this.getCanvas();
       }
       if (typeof callback == 'undefined') {
-        callback = function () {};
+        callback = function () { };
       }
       this.onCanvasCallbackList.push(callback);
       var canvas = self.getEle(eleOrId);
@@ -248,7 +251,7 @@ var Camera = (function () {
                 }
                 //*/
                 lastTime = nowTime;
-                if (self.cnt++ == 30 /* skip 30 frame*/ ) {
+                if (self.cnt++ == 30 /* skip 30 frame*/) {
                   for (var i = 0; i < self.onReadyCallbackList.length; i++) {
                     self.onReadyCallbackList[i]();
                   }
