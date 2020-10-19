@@ -15,6 +15,7 @@ var Camera = (function () {
         camType = 0;
       }
       this.cnt = 0;
+      this.fitParentElement = false;
       this.getImageFailure = false;
       this.onCanvasCallbackList = [];
       this.onReadyCallbackList = [];
@@ -32,6 +33,10 @@ var Camera = (function () {
       this.onReadyCallbackList.push(cb);
     }
 
+    setFitToContainer(fit) {
+      this.fitParentElement = fit;
+    }
+
     setAutoScale(autoScale) {
       this.autoScale = autoScale;
       return this;
@@ -47,7 +52,7 @@ var Camera = (function () {
         this.URL = camType;
         if (camType.indexOf("ws://") == 0) {
           this.camType = wsCam;
-        } else if (camType.indexOf("http://") == 0 || camType.indexOf(".mp4") > 0) {
+        } else if (camType.indexOf("http") == 0 || camType.indexOf(".mp4") > 0) {
           if (camType.indexOf(".mp4") > 0) {
             this.camType = videoStreamCam;
           } else if (camType.indexOf(":81/stream") > 0) {
@@ -148,15 +153,15 @@ var Camera = (function () {
           };
           var self = this;
           navigator.mediaDevices.getUserMedia(constraints).
-            then(function (stream) {
-              if (self.video) {
-                self.video.srcObject = stream;
-              }
-            }).catch(function (error) {
-              console.log('Error: ', error);
-            });
+          then(function (stream) {
+            if (self.video) {
+              self.video.srcObject = stream;
+            }
+          }).catch(function (error) {
+            console.log('Error: ', error);
+          });
           break;
-        /* WebRTC */
+          /* WebRTC */
         case wsCam:
           console.log("WebRTC:", this.camType);
           ConnectWebSocket(this.URL);
@@ -213,19 +218,17 @@ var Camera = (function () {
     async loop(img, camSnapshotDelay, callback) {
       var self = this;
       setTimeout(async function () {
-        if (self.onCanvasCallbackList.length > 0) {
-          try {
-            img = await self.addImageProcess(img, self.URL);
-            callback(img);
-            img.onload = null;
-            img.onerror = null;
-            var clone = img.cloneNode(true);
-            img.parentNode.replaceChild(clone, img);
-            img = clone;
-            self.loop(img, camSnapshotDelay, callback);
-          } catch (e) {
-            console.log(e);
-          }
+        try {
+          img = await self.addImageProcess(img, self.URL);
+          callback(img);
+          img.onload = null;
+          img.onerror = null;
+          var clone = img.cloneNode(true);
+          img.parentNode.replaceChild(clone, img);
+          img = clone;
+          self.loop(img, camSnapshotDelay, callback);
+        } catch (e) {
+          console.log(e);
         }
       }, camSnapshotDelay);
     }
@@ -245,12 +248,15 @@ var Camera = (function () {
         eleOrId = this.getCanvas();
       }
       if (typeof callback == 'undefined') {
-        callback = function () { };
+        callback = function () {};
       }
       this.onCanvasCallbackList.push(callback);
       var canvas = self.getEle(eleOrId);
       if (this.flip) {
         canvas.classList.add(this.id);
+      }
+      if (self.fitParentElement) {
+        self.fitToContainer(canvas);
       }
       self.canvas = canvas;
       self.ctx = canvas.getContext("2d");
@@ -267,7 +273,7 @@ var Camera = (function () {
               var lastTime = nowTime;
               var loop = function () {
                 lastTime = nowTime;
-                if (self.cnt++ == 30 /* skip 30 frame*/) {
+                if (self.cnt++ == 30 /* skip 30 frame*/ ) {
                   for (var i = 0; i < self.onReadyCallbackList.length; i++) {
                     self.onReadyCallbackList[i]();
                   }
@@ -389,9 +395,27 @@ var Camera = (function () {
       });
     }
 
+    fitToContainer(canvas) {
+      // Make it visually fill the positioned parent
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      // ...then set the internal size to match
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+
     createVideo() {
+      var canvas = this.getCanvas();
+      //canvas.setAttribute('style', 'position:relative;z-index:1;');
       var video = document.createElement('video');
+      video.setAttribute('width', canvas.width);
+      video.setAttribute('height', canvas.height);
+      video.setAttribute('style', 'position:absolute;z-index:0;opacity:0');
+      video.style.top = canvas.offsetTop + 'px';
+      video.style.left = canvas.offsetLeft + 'px';
+      canvas.parentNode.insertBefore(video, canvas.nextSibling);
       video.autoplay = true;
+      this.video = video;
       return video;
     }
 
@@ -416,6 +440,13 @@ var Camera = (function () {
         this.drawImg(i, c, isVideo);
       }
       this.ctx.restore();
+    }
+
+    stop() {
+      this.video.srcObject.getTracks().forEach(function (track) {
+        track.stop();
+      });
+      this.video = null;
     }
 
 
@@ -459,7 +490,7 @@ var Camera = (function () {
 
     upload(url, cb) {
       if (typeof cb == 'undefined')
-        cb = function () { }
+        cb = function () {}
       this.drawTime();
       if (this.getImageFailure) {
         console.log("upload cancel...");

@@ -16,12 +16,12 @@
   "dependencies": [
     "adapter.js",
     "webRTC.js",
-    "camera.js",
     "opencv.js",
     "imageFilter.js",
     "actor.js",
     "HotSpot.js",
-    "waspot-blockly.js"
+    "waspot-blockly.js",
+    "camera.js"
   ],
   "msg": "blockly/msg",
   "blocksMsg": "blockly/msg/blocks",

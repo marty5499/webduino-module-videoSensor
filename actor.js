@@ -88,10 +88,10 @@ class Actor {
       "detectShadows": false,
       "objMinSize": 10,
       "touchTime": 1000,
-      "filter": [/*"e2", "g1", "d3"*/]
+      "filter": [ /*"e2", "g1", "d3"*/ ]
     };
-    self.onTouchCallback = function () { };
-    self.onCollisionCallback = function (obj) { };
+    self.onTouchCallback = function () {};
+    self.onCollisionCallback = function (obj) {};
     self.setTracking({
       'inside': function (pos) {
         var nowTime = new Date().getTime();
@@ -212,6 +212,7 @@ class Actor {
   checkCollision() {
     var x = this.x + (this.width / 2);
     var y = this.y + (this.height / 2);
+
     function distance(obj) {
       var objX = obj.x + obj.width / 2;
       var objY = obj.y + obj.height / 2;
@@ -292,8 +293,7 @@ class Actor {
       setTimeout(function () {
         var parentEle = self.img.parentElement;
         parentEle.removeChild(self.img);
-      }, 1000
-      );
+      }, 1000);
     }
   }
 
@@ -334,8 +334,14 @@ class Actor {
     return this;
   }
 
-  start() {
-    this.tracking.start();
+  async start() {
+    var self = this;
+    return new Promise((resolve, reject) => {
+      setTimeout(function () {
+        self.tracking.start();
+        resolve();
+      }, 2000);
+    });
   }
 
 }

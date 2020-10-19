@@ -42,7 +42,7 @@ Blockly.JavaScript['waspot_touch_actor'] = function (block) {
   var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
   var statements_inside = Blockly.JavaScript.statementToCode(block, 'inside');
   var code = variable_actor + '.onTouch(\n';
-  code += 'function(pos){\n';
+  code += 'async function(pos){\n';
   code += statements_inside;
   code += '\n});\n';
   return code;
@@ -52,7 +52,7 @@ Blockly.JavaScript['waspot_collision_actor'] = function (block) {
   var variable_actor = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('actor'), Blockly.Variables.NAME_TYPE);
   var statements_inside = Blockly.JavaScript.statementToCode(block, 'inside');
   var code = variable_actor + '.onCollision(\n';
-  code += 'function(){\n';
+  code += 'async function(){\n';
   code += statements_inside;
   code += '\n});\n';
   return code;
@@ -135,7 +135,7 @@ Blockly.JavaScript['waspot_create_actor'] = function (block) {
   code += '"stage":' + variable_camera + ',\n';
   code += '"img":' + text_imgURL + ',\n';
   code += '"pos":[ -1000, -1000,' + text_width + ',' + text_height + ']\n});\n';
-  code += variable_actor + '.start();\n';
+  code += 'await ' + variable_actor + '.start();\n';
   return code;
 };
 
