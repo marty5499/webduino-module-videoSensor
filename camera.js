@@ -4,6 +4,7 @@ var Camera = (function () {
   const jpgCam = 2;
   const imgStreamCam = 3;
   const videoStreamCam = 4;
+  const channel = 5; // webrtc channel
 
   class Camera {
     // webCam: 0,1,2
@@ -52,6 +53,8 @@ var Camera = (function () {
         this.URL = camType;
         if (camType.indexOf("ws://") == 0) {
           this.camType = wsCam;
+        } else if (camType.indexOf("channel://") == 0) {
+          this.camType = channel;
         } else if (camType.indexOf("http") == 0 || camType.indexOf(".mp4") > 0) {
           if (camType.indexOf(".mp4") > 0) {
             this.camType = videoStreamCam;
@@ -161,10 +164,15 @@ var Camera = (function () {
             console.log('Error: ', error);
           });
           break;
-          /* WebRTC */
+          /* WebRTC RPi*/
         case wsCam:
           console.log("WebRTC:", this.camType);
           ConnectWebSocket(this.URL);
+          break;
+          /* WebRTC*/
+        case channel:
+          console.log("WebRTC channel:", this.camType);
+          this.URL = this.URL.substring(10);
           break;
         case jpgCam:
           // http://192.168.43.201:9966/ok.png
@@ -218,17 +226,19 @@ var Camera = (function () {
     async loop(img, camSnapshotDelay, callback) {
       var self = this;
       setTimeout(async function () {
-        try {
-          img = await self.addImageProcess(img, self.URL);
-          callback(img);
-          img.onload = null;
-          img.onerror = null;
-          var clone = img.cloneNode(true);
-          img.parentNode.replaceChild(clone, img);
-          img = clone;
-          self.loop(img, camSnapshotDelay, callback);
-        } catch (e) {
-          console.log(e);
+        if (self.onCanvasCallbackList.length > 0) {
+          try {
+            img = await self.addImageProcess(img, self.URL);
+            callback(img);
+            img.onload = null;
+            img.onerror = null;
+            var clone = img.cloneNode(true);
+            img.parentNode.replaceChild(clone, img);
+            img = clone;
+            self.loop(img, camSnapshotDelay, callback);
+          } catch (e) {
+            console.log(e);
+          }
         }
       }, camSnapshotDelay);
     }
@@ -264,6 +274,70 @@ var Camera = (function () {
       this.buttonTrigger(canvas, function () {
         self.startCam();
         switch (self.camType) {
+          case channel:
+            const peers = {}
+            const ROOM_ID = self.URL;
+            const socket = io.connect('https://webrtc.webduino.io/')
+
+            // (1)
+            const myPeer = new Peer(undefined, {
+              host: 'peerjs.webduino.io',
+              path: '/myapp',
+              proxied: true
+            })
+
+            // (2)
+            myPeer.on('open', id => {
+              socket.emit('join-room', ROOM_ID, id)
+            })
+
+            // (3) 取得已加入的用戶
+            myPeer.on('call', call => {
+              console.log("on call");
+              //將本身的 stream 送給線上用戶
+              const video = document.createElement('video')
+              call.answer(video.stream);
+              //新進來的用戶送過來的串流
+              call.on('stream', userVideoStream => {
+                console.log("Streaming...");
+                const video = document.createElement('video')
+                video.srcObject = userVideoStream
+                video.addEventListener('loadedmetadata', () => {
+                  video.play();
+                })
+
+                function onFrame() {
+                  window.requestAnimationFrame(onFrame);
+                  self.rotateImg(video, canvas, self.rotate, true);
+                  if (self.onCanvasCallbackList.length > 0) {
+                    for (var i = 0; i < self.onCanvasCallbackList.length; i++) {
+                      self.onCanvasCallbackList[i](self.canvas, video, i, self.onCanvasCallbackList.length);
+                    }
+                  }
+                }
+                onFrame();
+              })
+            })
+
+            //有新進來的用戶
+            socket.on('user-connected', userId => {
+              console.log("socket-user-connected:", userId);
+              const call = myPeer.call(userId, stream)
+              call.on('stream', userVideoStream => {
+                //addVideoStream(video, userVideoStream)
+              })
+              call.on('close', () => {
+                video.remove()
+              })
+              peers[userId] = call
+            })
+
+            //線上用戶斷線
+            socket.on('user-disconnected', userId => {
+              if (peers[userId]) peers[userId].close()
+            })
+
+            break;
           case webCam:
           case wsCam:
             var video = self.createVideo();
