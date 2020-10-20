@@ -543,7 +543,7 @@ var Camera = (function () {
     }
 
     buttonTrigger(ele, callback) {
-      if (this.camType != 0 && this.camType != jpgCam && this.camType != imgStreamCam && this.camType != videoStreamCam) {
+      if (this.camType != 0 && this.camType != jpgCam && this.camType != imgStreamCam && this.camType != videoStreamCam && this.camType != channel) {
         var btn = document.createElement("BUTTON");
         btn.setAttribute("style", "background-color: #e0f0e0;position: fixed;z-index:2;top:5px;left:5px;font-size:96px");
         document.getElementsByTagName("body")[0].append(btn);

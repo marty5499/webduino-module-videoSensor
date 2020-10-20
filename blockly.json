@@ -16,6 +16,8 @@
   "dependencies": [
     "adapter.js",
     "webRTC.js",
+    "peerjs.min.js",
+    "socket.io.js",
     "opencv.js",
     "imageFilter.js",
     "actor.js",
