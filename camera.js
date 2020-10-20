@@ -293,13 +293,12 @@ var Camera = (function () {
 
             // (3) 取得已加入的用戶
             myPeer.on('call', call => {
-              console.log("on call");
               //將本身的 stream 送給線上用戶
               const video = document.createElement('video')
               call.answer(video.stream);
               //新進來的用戶送過來的串流
               call.on('stream', userVideoStream => {
-                console.log("Streaming...");
+                //console.log("Streaming...");
                 const video = document.createElement('video')
                 video.srcObject = userVideoStream
                 video.addEventListener('loadedmetadata', () => {
